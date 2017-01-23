@@ -1,5 +1,5 @@
-# COMP4970
-DataMETL
+# COMP4970 - Software Engineering
+## DataMETL (Data Management Extract Transform Load System)
 
 [![Build Status](https://travis-ci.org/mikespallino/COMP4970.svg?branch=master)](https://travis-ci.org/mikespallino/COMP4970)
 
