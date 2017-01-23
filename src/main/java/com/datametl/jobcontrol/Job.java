@@ -11,20 +11,22 @@ public class Job implements JobInterface, Runnable {
     private int retries;
     private JobState state;
     private Thread curThread;
-    private SubJob curSubJob;
+    private int curSubJob;
 
     public Job(List<SubJob> subJobs, int retries) {
         this.retries = retries;
         this.subJobs = subJobs;
         this.state = JobState.NOT_STARTED;
         this.curThread = new Thread(this);
-        curSubJob = subJobs.get(0);
+        curSubJob = 0;
     }
 
     public void run() {
         int currentRetryCount = 0;
-        for(SubJob sub: subJobs) {
-            curSubJob = sub;
+
+        int subJobsSize = subJobs.size();
+        while(curSubJob < subJobsSize) {
+            SubJob sub = subJobs.get(curSubJob);
             sub.start();
             sub.stop();
 
@@ -37,13 +39,20 @@ public class Job implements JobInterface, Runnable {
                 } else {
                     break;
                 }
+                currentRetryCount++;
             }
 
             currentRetryCount = 0;
             if (state == JobState.FAILED || state == JobState.KILLED) {
                 break;
             }
-
+            curSubJob++;
+            subJobsSize = subJobs.size();
+        }
+        if (curSubJob == subJobsSize) {
+            // INFO: We've incremented past the number of SubJobs because of the exit condition of the loop above
+            // so we decrement here to put things back to the last SubJob position
+            curSubJob--;
         }
 
     }
@@ -76,7 +85,7 @@ public class Job implements JobInterface, Runnable {
     }
 
     public boolean kill() {
-        curSubJob.kill();
+        subJobs.get(curSubJob).kill();
         curThread.interrupt();
         state = JobState.KILLED;
         return true;

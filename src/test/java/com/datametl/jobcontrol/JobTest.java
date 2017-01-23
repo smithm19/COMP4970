@@ -73,9 +73,15 @@ public class JobTest {
         Job job = new Job(this.subJobs, 3);
         job.start();
         assertEquals(3, job.getSubJobs().size());
+        Thread.sleep(2000);
         SubJob newSubJob = new SubJob(new ExampleTask());
         job.addSubJob(newSubJob);
         assertEquals(4, job.getSubJobs().size());
+        job.stop();
+        List<SubJob> subJobs = job.getSubJobs();
+        for (SubJob s: subJobs) {
+            assertEquals(JobState.SUCCESS, s.getTaskReturnCode());
+        }
         job.kill();
     }
 
