@@ -1,13 +1,13 @@
 package com.datametl.tasks;
 
-import java.util.*;
+import com.datametl.jobcontrol.JobState;
 
 /**
  * Created by mspallino on 1/18/17.
  */
 public class ExampleTask implements Task {
 
-    private int returnCode;
+    private JobState returnCode;
 
     /**
      * This is just meant to be an example of how this "should" work.
@@ -17,14 +17,14 @@ public class ExampleTask implements Task {
             Thread.sleep(2000);
         } catch (Exception ex) {
             ex.printStackTrace();
-            returnCode = -1;
+            returnCode = JobState.KILLED;
             return;
         }
         System.out.println("Did the thing!");
-        returnCode = 0;
+        returnCode = JobState.SUCCESS;
     }
 
-    public int getResult() {
+    public JobState getResult() {
         return returnCode;
     }
 }

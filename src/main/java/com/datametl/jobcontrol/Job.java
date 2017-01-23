@@ -1,21 +1,55 @@
 package com.datametl.jobcontrol;
 
-import com.datametl.tasks.Task;
+import java.util.List;
 
 /**
- * Created by mspallino on 1/16/17.
+ * Created by mspallino on 1/23/17.
  */
-class Job implements JobInterface, Runnable {
+public class Job implements JobInterface, Runnable {
 
-    private Task t;
+    private List<SubJob> subJobs;
+    private int retries;
+    private JobState state;
     private Thread curThread;
+    private SubJob curSubJob;
 
-    Job(Task t) {
-        this.t = t;
-        curThread = new Thread(this);
+    public Job(List<SubJob> subJobs, int retries) {
+        this.retries = retries;
+        this.subJobs = subJobs;
+        this.state = JobState.NOT_STARTED;
+        this.curThread = new Thread(this);
+        curSubJob = subJobs.get(0);
+    }
+
+    public void run() {
+        int currentRetryCount = 0;
+        for(SubJob sub: subJobs) {
+            curSubJob = sub;
+            sub.start();
+            sub.stop();
+
+            while(currentRetryCount < retries) {
+                JobState returnState = sub.getTaskReturnCode();
+
+                if (returnState == JobState.FAILED || returnState == JobState.KILLED) {
+                    sub.restart();
+                    state = JobState.FAILED;
+                } else {
+                    break;
+                }
+            }
+
+            currentRetryCount = 0;
+            if (state == JobState.FAILED || state == JobState.KILLED) {
+                break;
+            }
+
+        }
+
     }
 
     public boolean start() {
+        state = JobState.RUNNING;
         curThread.start();
         return true;
     }
@@ -23,8 +57,9 @@ class Job implements JobInterface, Runnable {
     public boolean stop() {
         try {
             curThread.join();
+            state = JobState.SUCCESS;
         } catch (InterruptedException ex) {
-            ex.printStackTrace();
+            state = JobState.FAILED;
             return false;
         }
         return true;
@@ -36,25 +71,26 @@ class Job implements JobInterface, Runnable {
         return true;
     }
 
+    public boolean isRunning() {
+        return state == JobState.RUNNING;
+    }
+
     public boolean kill() {
+        curSubJob.kill();
         curThread.interrupt();
+        state = JobState.KILLED;
         return true;
     }
 
-    public int getTaskReturnCode() {
-        if (!isRunning()) {
-            return t.getResult();
-        } else {
-            stop();
-            return t.getResult();
-        }
+    public List<SubJob> getSubJobs() {
+        return subJobs;
     }
 
-    public boolean isRunning() {
-        return curThread.isAlive();
+    public boolean addSubJob(SubJob sub) {
+        return subJobs.add(sub);
     }
 
-    public void run() {
-        t.apply();
+    public JobState getState() {
+        return state;
     }
 }

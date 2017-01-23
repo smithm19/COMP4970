@@ -4,70 +4,91 @@ import com.datametl.tasks.ExampleTask;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.Assert.*;
 
 /**
- * Created by mspallino on 1/16/17.
+ * Created by mspallino on 1/23/17.
  */
 public class JobTest {
-    private ExampleTask exampleTask;
+    private List<SubJob> subJobs;
 
     @Before
-    public void setUp() throws Exception {
-        this.exampleTask = new ExampleTask();
+    public void setUp() {
+        subJobs = new ArrayList();
+        for(int i = 0; i < 3; ++i) {
+            subJobs.add(new SubJob(new ExampleTask()));
+        }
+    }
+
+    @Test
+    public void run() throws Exception {
+        Job job = new Job(this.subJobs, 3);
+        job.start();
     }
 
     @Test
     public void start() throws Exception {
-        Job test = new Job(this.exampleTask);
-        boolean result = test.start();
-        assertTrue(result);
-        assertTrue(test.isRunning());
-        test.kill();
+        Job job = new Job(this.subJobs, 3);
+        boolean val = job.start();
+        assertTrue(val);
+        assertEquals(JobState.RUNNING, job.getState());
+        assertTrue(job.isRunning());
+        job.kill();
     }
 
     @Test
     public void stop() throws Exception {
-        Job test = new Job(this.exampleTask);
-        boolean result = test.stop();
-        assertTrue(result);
-        assertFalse(test.isRunning());
-        test.kill();
+        Job job = new Job(this.subJobs, 3);
+        job.start();
+        boolean val = job.stop();
+        assertTrue(val);
+        assertEquals(JobState.SUCCESS, job.getState());
+        job.kill();
     }
 
     @Test
     public void restart() throws Exception {
-        Job test = new Job(this.exampleTask);
-        boolean result = test.restart();
-        assertTrue(result);
-        assertTrue(test.isRunning());
-        test.kill();
+        Job job = new Job(this.subJobs, 3);
+        boolean val = job.restart();
+        assertTrue(val);
+        assertEquals(JobState.RUNNING, job.getState());
+        job.kill();
+    }
+
+
+    @Test
+    public void kill() throws Exception {
+        Job job = new Job(this.subJobs, 3);
+        job.start();
+        boolean val = job.kill();
+        assertTrue(val);
+        assertEquals(JobState.KILLED, job.getState());
     }
 
     @Test
-    public void isRunning() throws Exception {
-        Job test = new Job(this.exampleTask);
-        assertFalse(test.isRunning());
-        test.start();
-        assertTrue(test.isRunning());
-        test.stop();
-        assertFalse(test.isRunning());
-        test.kill();
+    public void addSubJob() throws Exception {
+        Job job = new Job(this.subJobs, 3);
+        job.start();
+        assertEquals(3, job.getSubJobs().size());
+        SubJob newSubJob = new SubJob(new ExampleTask());
+        job.addSubJob(newSubJob);
+        assertEquals(4, job.getSubJobs().size());
+        job.kill();
     }
 
     @Test
-    public void successfulExecution() throws Exception {
-        Job test = new Job(this.exampleTask);
-        test.start();
-        assertEquals(0, test.getTaskReturnCode());
-    }
+    public void goodJobExecution() throws Exception {
+        Job job = new Job(this.subJobs, 3);
+        boolean val1 = job.start();
+        assertTrue(val1);
 
-    @Test
-    public void badExecution() throws Exception {
-        Job test = new Job(this.exampleTask);
-        test.start();
-        test.kill();
-        assertEquals(-1, test.getTaskReturnCode());
+        boolean val2 = job.stop();
+        assertTrue(val2);
+
+        assertEquals(JobState.SUCCESS, job.getState());
     }
 
 }

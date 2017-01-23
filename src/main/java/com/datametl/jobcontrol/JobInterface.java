@@ -1,13 +1,17 @@
 package com.datametl.jobcontrol;
 
+import java.util.List;
+
 /**
- * Created by mspallino on 1/16/17.
+ * Created by mspallino on 1/23/17.
  */
-interface JobInterface {
+public interface JobInterface {
     boolean start();
     boolean stop();
     boolean restart();
     boolean isRunning();
     boolean kill();
-    int getTaskReturnCode();
+    List<SubJob> getSubJobs();
+    boolean addSubJob(SubJob sub);
+    JobState getState();
 }
