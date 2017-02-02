@@ -13,6 +13,7 @@ public class Job implements JobInterface, Runnable {
     private Thread curThread;
     private int curSubJob;
 
+//    TODO: REFACTOR TO WORKFLOW
     public Job(List<SubJob> subJobs, int retries) {
         this.retries = retries;
         this.subJobs = subJobs;

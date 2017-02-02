@@ -17,7 +17,7 @@ public class JobTest {
 
     @Before
     public void setUp() {
-        subJobs = new ArrayList();
+        subJobs = new ArrayList<SubJob>();
         for(int i = 0; i < 3; ++i) {
             subJobs.add(new SubJob(new ExampleTask()));
         }
