@@ -6,8 +6,7 @@ import java.util.*;
  * Created by mspallino on 1/30/17.
  */
 class JobManager implements Runnable {
-
-    //INFO: What if this was a map of UUID -> Job?
+    
     private Map<UUID, Job> jobs;
     private Thread curThread;
 
@@ -52,6 +51,9 @@ class JobManager implements Runnable {
                 } catch (InterruptedException ex) {
                     System.out.println("Uh-oh");
                 }
+                jobSize = jobs.size();
+                jobIds.clear();
+                jobIds.addAll(jobs.keySet());
                 continue;
             }
             UUID curJobId = jobIds.get(jobIndex);

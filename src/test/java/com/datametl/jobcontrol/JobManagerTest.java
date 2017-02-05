@@ -34,7 +34,17 @@ public class JobManagerTest {
         UUID jobId = manager.addJob(job);
         boolean started = manager.startJob(jobId);
         assertTrue(started);
+
+        setUp();
+        UUID newJobId = manager.addJob(job);
+        boolean newJobStarted = manager.startJob(newJobId);
+        assertTrue(newJobStarted);
+
+        Thread.sleep(1000);
+
         manager.stopJob(jobId);
+        manager.stopJob(newJobId);
+        Thread.sleep(2000);
     }
 
     @Test
