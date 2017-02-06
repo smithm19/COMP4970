@@ -1,6 +1,7 @@
 package com.datametl.jobcontrol;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by mspallino on 1/23/17.
@@ -12,8 +13,8 @@ public class Job implements JobInterface, Runnable {
     private JobState state;
     private Thread curThread;
     private int curSubJob;
+    private Map<String, Object> packet;
 
-//    TODO: REFACTOR TO WORKFLOW
     public Job(List<SubJob> subJobs, int retries) {
         this.retries = retries;
         this.subJobs = subJobs;
@@ -102,5 +103,13 @@ public class Job implements JobInterface, Runnable {
 
     public JobState getState() {
         return state;
+    }
+
+    public Map<String, Object> getETLPacket() {
+        return this.packet;
+    }
+
+    public void setETLPacket(Map<String, Object> packet) {
+        this.packet = packet;
     }
 }

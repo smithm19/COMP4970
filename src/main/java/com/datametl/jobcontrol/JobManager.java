@@ -6,7 +6,7 @@ import java.util.*;
  * Created by mspallino on 1/30/17.
  */
 class JobManager implements Runnable {
-    
+
     private Map<UUID, Job> jobs;
     private Thread curThread;
 
@@ -18,6 +18,7 @@ class JobManager implements Runnable {
 
     public UUID addJob(Job newJob) {
         UUID newId = UUID.randomUUID();
+        Map<String, Object> etlPacket = new HashMap<String, Object>();
         jobs.put(newId, newJob);
         return newId;
     }
