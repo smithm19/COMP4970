@@ -3,7 +3,6 @@ package com.datametl.jobcontrol;
 import org.json.JSONObject;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by mspallino on 1/23/17.
@@ -15,7 +14,7 @@ public class Job implements JobInterface, Runnable {
     private JobState state;
     private Thread curThread;
     private int curSubJob;
-    private JSONObject packet;
+    private static JSONObject packet;
 
     public Job(List<SubJob> subJobs, int retries) {
         this.retries = retries;
@@ -23,6 +22,9 @@ public class Job implements JobInterface, Runnable {
         this.state = JobState.NOT_STARTED;
         this.curThread = new Thread(this);
         curSubJob = 0;
+        for (SubJob sub: subJobs) {
+            sub.setParent(this);
+        }
     }
 
     public void run() {
@@ -32,6 +34,8 @@ public class Job implements JobInterface, Runnable {
         while(curSubJob < subJobsSize) {
             SubJob sub = subJobs.get(curSubJob);
             sub.start();
+
+            //TODO: Maybe when we really get things going we don't want to do this?
             sub.stop();
 
             while(currentRetryCount < retries) {
@@ -100,6 +104,7 @@ public class Job implements JobInterface, Runnable {
     }
 
     public boolean addSubJob(SubJob sub) {
+        sub.setParent(this);
         return subJobs.add(sub);
     }
 
@@ -108,10 +113,10 @@ public class Job implements JobInterface, Runnable {
     }
 
     public JSONObject getETLPacket() {
-        return this.packet;
+        return packet;
     }
 
-    public void setETLPacket(JSONObject packet) {
-        this.packet = packet;
+    public void setETLPacket(JSONObject newPacket) {
+        packet = newPacket;
     }
 }

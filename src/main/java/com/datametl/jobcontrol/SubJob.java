@@ -9,10 +9,12 @@ class SubJob implements SubJobInterface, Runnable {
 
     private Task t;
     private Thread curThread;
+    private Job parent;
 
     SubJob(Task t) {
         this.t = t;
         curThread = new Thread(this);
+        parent = null;
     }
 
     public boolean start() {
@@ -56,5 +58,13 @@ class SubJob implements SubJobInterface, Runnable {
 
     public void run() {
         t.apply();
+    }
+
+    public Job getParent() {
+        return parent;
+    }
+
+    public void setParent(Job parent) {
+        this.parent = parent;
     }
 }

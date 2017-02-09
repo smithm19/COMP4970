@@ -10,4 +10,6 @@ interface SubJobInterface {
     boolean isRunning();
     boolean kill();
     JobState getTaskReturnCode();
+    Job getParent();
+    void setParent(Job parent);
 }
