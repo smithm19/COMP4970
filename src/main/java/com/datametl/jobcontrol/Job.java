@@ -1,5 +1,7 @@
 package com.datametl.jobcontrol;
 
+import org.json.JSONObject;
+
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +15,7 @@ public class Job implements JobInterface, Runnable {
     private JobState state;
     private Thread curThread;
     private int curSubJob;
-    private Map<String, Object> packet;
+    private JSONObject packet;
 
     public Job(List<SubJob> subJobs, int retries) {
         this.retries = retries;
@@ -105,11 +107,11 @@ public class Job implements JobInterface, Runnable {
         return state;
     }
 
-    public Map<String, Object> getETLPacket() {
+    public JSONObject getETLPacket() {
         return this.packet;
     }
 
-    public void setETLPacket(Map<String, Object> packet) {
+    public void setETLPacket(JSONObject packet) {
         this.packet = packet;
     }
 }

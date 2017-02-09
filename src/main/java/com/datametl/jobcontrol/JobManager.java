@@ -1,6 +1,8 @@
 package com.datametl.jobcontrol;
 
 import java.util.*;
+import org.json.*;
+
 
 /**
  * Created by mspallino on 1/30/17.
@@ -18,7 +20,43 @@ class JobManager implements Runnable {
 
     public UUID addJob(Job newJob) {
         UUID newId = UUID.randomUUID();
-        Map<String, Object> etlPacket = new HashMap<String, Object>();
+        String emptyPacketData = "{\n" +
+                "\t\"source\": {\n" +
+                "\t\t\"host_ip\": \"\",\n" +
+                "\t\t\"host_port\": 1234,\n" +
+                "\t\t\"path\": \"\",\n" +
+                "\t\t\"file_type\": \"\"\n" +
+                "\t},\n" +
+                "\t\"rules\": {\n" +
+                "\t\t\"transformations\": {\n" +
+                "\t\t\t\"transform1\": {\n" +
+                "\t\t\t    \"source_column\": \"\",\n" +
+                "\t\t\t\t\"new_field\": \"\",\n" +
+                "\t\t\t\t\"transform\": \"\"\n" +
+                "\t\t\t}\n" +
+                "\t\t},\n" +
+                "\t\t\"mappings\": {\n" +
+                "\t\t\t\"SOURCE_FIELD\": \"DESTINATION_FIELD\"\n" +
+                "\t\t},\n" +
+                "\t\t\"filters\": {\n" +
+                "\t\t\t\"filter1\": {\n" +
+                "\t\t\t\t\"source_column\": \"\",\n" +
+                "\t\t\t\t\"filter_value\": \"\",\n" +
+                "\t\t\t\t\"equality_test\": \"\"\n" +
+                "\t\t\t},\n" +
+                "\t\t}\n" +
+                "\t},\n" +
+                "\t\"destination\": {\n" +
+                "\t\t\"host_ip\": \"\",\n" +
+                "\t\t\"host_port\": 1234,\n" +
+                "\t\t\"username\": \"\",\n" +
+                "\t\t\"password\": \"\",\n" +
+                "\t\t\"storage_type\": \"\"\n" +
+                "\t},\n" +
+                "\t\"data\": []\n" +
+                "}";
+        JSONObject eltPacket = new JSONObject(emptyPacketData);
+        newJob.setETLPacket(eltPacket);
         jobs.put(newId, newJob);
         return newId;
     }
@@ -37,6 +75,10 @@ class JobManager implements Runnable {
 
     public boolean stopJob(UUID jobId) {
         return jobs.get(jobId).stop();
+    }
+
+    public JSONObject getJobETLPacket(UUID jobId) {
+        return jobs.get(jobId).getETLPacket();
     }
 
     public void run() {

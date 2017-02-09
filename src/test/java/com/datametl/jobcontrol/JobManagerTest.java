@@ -1,6 +1,7 @@
 package com.datametl.jobcontrol;
 
 import com.datametl.tasks.ExampleTask;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -54,6 +55,28 @@ public class JobManagerTest {
         boolean started = manager.startJob(jobId);
         assertTrue(started);
         manager.removeJob(jobId);
+    }
+
+    @Test
+    public void  getETLPacket() throws Exception {
+        JobManager manager = new JobManager();
+        UUID jobId = manager.addJob(job);
+
+        JSONObject packet = job.getETLPacket();
+        System.out.println(packet);
+
+        assertNotNull(packet.getJSONArray("data"));
+        assertNotNull(packet.get("source"));
+        assertNotNull(packet.get("rules"));
+        assertNotNull(packet.get("destination"));
+
+        JSONObject managerPacket = manager.getJobETLPacket(jobId);
+        System.out.println(managerPacket);
+
+        assertNotNull(managerPacket.getJSONArray("data"));
+        assertNotNull(managerPacket.get("source"));
+        assertNotNull(managerPacket.get("rules"));
+        assertNotNull(managerPacket.get("destination"));
     }
 
 }

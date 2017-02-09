@@ -1,5 +1,7 @@
 package com.datametl.jobcontrol;
 
+import org.json.JSONObject;
+
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +17,6 @@ public interface JobInterface {
     List<SubJob> getSubJobs();
     boolean addSubJob(SubJob sub);
     JobState getState();
-    Map<String, Object> getETLPacket();
-    void setETLPacket(Map<String, Object> packet);
+    JSONObject getETLPacket();
+    void setETLPacket(JSONObject packet);
 }
