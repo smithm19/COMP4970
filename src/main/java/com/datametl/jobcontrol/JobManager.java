@@ -55,8 +55,8 @@ public class JobManager implements Runnable {
                 "\t},\n" +
                 "\t\"data\": []\n" +
                 "}";
-        JSONObject eltPacket = new JSONObject(emptyPacketData);
-        newJob.setETLPacket(eltPacket);
+        JSONObject etlPacket = new JSONObject(emptyPacketData);
+        newJob.setETLPacket(etlPacket);
         jobs.put(newId, newJob);
         return newId;
     }
