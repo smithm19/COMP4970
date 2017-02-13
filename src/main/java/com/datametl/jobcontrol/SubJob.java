@@ -1,19 +1,21 @@
 package com.datametl.jobcontrol;
 
 import com.datametl.tasks.Task;
+import org.json.JSONObject;
 
 /**
  * Created by mspallino on 1/16/17.
  */
-class SubJob implements SubJobInterface, Runnable {
+public class SubJob implements SubJobInterface, Runnable {
 
     private Task t;
     private Thread curThread;
     private Job parent;
 
-    SubJob(Task t) {
+    public SubJob(Task t) {
         this.t = t;
         curThread = new Thread(this);
+        this.t.setParent(this);
         parent = null;
     }
 
@@ -66,5 +68,9 @@ class SubJob implements SubJobInterface, Runnable {
 
     public void setParent(Job parent) {
         this.parent = parent;
+    }
+
+    public JSONObject getETLPacketFromParent() {
+        return parent != null ? parent.getETLPacket() : null;
     }
 }

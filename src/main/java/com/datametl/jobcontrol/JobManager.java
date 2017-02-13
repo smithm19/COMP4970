@@ -7,7 +7,7 @@ import org.json.*;
 /**
  * Created by mspallino on 1/30/17.
  */
-class JobManager implements Runnable {
+public class JobManager implements Runnable {
 
     private Map<UUID, Job> jobs;
     private Thread curThread;
