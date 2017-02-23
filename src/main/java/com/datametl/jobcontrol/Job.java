@@ -14,7 +14,7 @@ public class Job implements JobInterface, Runnable {
     private JobState state;
     private Thread curThread;
     private int curSubJob;
-    private static JSONObject packet;
+    private JSONObject packet;
 
     public Job(List<SubJob> subJobs, int retries) {
         this.retries = retries;
