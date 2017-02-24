@@ -69,7 +69,6 @@ public class JobManager implements Runnable {
                 "        \"destination_header\": [tester1, tester2, tester3, desty4],\n" +
                 "        \"contents\": [[\"Matt\", \"yes\", \"22\"], [\"Andy\", \"no\", \"18\"]] \n" +
                 "}}\n";
-
         JSONObject etlPacket = new JSONObject(emptyPacketData);
         newJob.setETLPacket(etlPacket);
         jobs.put(newId, newJob);
@@ -138,7 +137,7 @@ public class JobManager implements Runnable {
                     break;
             }
             try {
-                Thread.sleep(500);
+                Thread.sleep(1000);
             } catch (InterruptedException ex) {
                 System.out.println("Uh-oh");
             }

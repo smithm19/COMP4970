@@ -10,6 +10,8 @@ import java.io.File;
  * Created by mspallino on 2/16/17.
  */
 public class DataSegmentationTask implements Task {
+
+    private JobState returnCode = JobState.NOT_STARTED;
     private SubJob parent;
     private int documentsPerChunk;
     private long currentBytePosition;
@@ -22,16 +24,27 @@ public class DataSegmentationTask implements Task {
     }
 
     public void apply() {
+        returnCode = JobState.RUNNING;
         JSONObject etlPacket = parent.getETLPacketFromParent();
         String filePath = etlPacket.getJSONObject("source").getString("path");
         File fin = new File(filePath);
+        if (fin.exists() == false) {
+            returnCode = JobState.FAILED;
+            throw new RuntimeException("Could not find file!");
+        }
         maxFilePosition = fin.length();
         etlPacket.put("documents_to_read", documentsPerChunk);
-        etlPacket.put("currentBytePosition", currentBytePosition);
+        etlPacket.put("current_byte_position", currentBytePosition);
         
         Task extractTask = new ExtractTask();
         SubJob newExtractJob = new SubJob(extractTask);
-        parent.getParent().addSubJob(newExtractJob);
+        boolean status = parent.getParent().addSubJob(newExtractJob);
+        if (status) {
+            System.out.println("Added initial ExtractSubJob");
+        } else {
+            returnCode = JobState.FAILED;
+            throw new RuntimeException("Could not insert job in list!");
+        }
 
         /*
          * We want to keep checking to see if the current byte position from the packet has changed.
@@ -40,25 +53,29 @@ public class DataSegmentationTask implements Task {
          */
         long packetBytePosition;
         while(currentBytePosition < maxFilePosition) {
-            packetBytePosition = etlPacket.getLong("currentBytePosition");
+            packetBytePosition = etlPacket.getLong("current_byte_position");
             if(currentBytePosition == packetBytePosition) {
                 try {
-                    Thread.sleep(30000);
+                    System.out.println("waiting...");
+                    Thread.sleep(3000);
                 } catch (InterruptedException ex) {
                     ex.printStackTrace();
+                    returnCode = JobState.FAILED;
                 }
                 continue;
             }
+            System.out.println("Previous chunk done! Issuing new ExtractSubJob! bytes:" + currentBytePosition);
             currentBytePosition = packetBytePosition;
-            extractTask = new ExtractTask();
-            newExtractJob = new SubJob(extractTask);
-            parent.getParent().addSubJob(newExtractJob);
+            ExtractTask nextChunkExtractTask = new ExtractTask();
+            SubJob nextChunkExtractJob = new SubJob(nextChunkExtractTask);
+            parent.getParent().addSubJob(nextChunkExtractJob);
         }
 
+        returnCode = JobState.SUCCESS;
     }
 
     public JobState getResult() {
-        return null;
+        return returnCode;
     }
 
     public void setParent(SubJob parent) {

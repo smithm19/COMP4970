@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 import static org.junit.Assert.*;
 
@@ -13,11 +14,11 @@ import static org.junit.Assert.*;
  * Created by mspallino on 1/23/17.
  */
 public class JobTest {
-    private List<SubJob> subJobs;
+    private Vector<SubJob> subJobs;
 
     @Before
     public void setUp() {
-        subJobs = new ArrayList<SubJob>();
+        subJobs = new Vector<SubJob>();
         for(int i = 0; i < 3; ++i) {
             subJobs.add(new SubJob(new ExampleTask()));
         }
@@ -70,6 +71,8 @@ public class JobTest {
 
     @Test
     public void addSubJob() throws Exception {
+        // INFO: This test isn't that good. It's dependent on tasks not completing before inserting another
+        //        maybe we should come up with a better test?
         Job job = new Job(this.subJobs, 3);
         job.start();
         assertEquals(3, job.getSubJobs().size());
