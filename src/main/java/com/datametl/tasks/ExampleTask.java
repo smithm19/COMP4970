@@ -9,18 +9,19 @@ import com.datametl.jobcontrol.Job;
  */
 public class ExampleTask implements Task {
 
-    private JobState returnCode;
+    private JobState returnCode = JobState.NOT_STARTED;
     private SubJob parent = null;
 
     /**
      * This is just meant to be an example of how this "should" work.
      */
     public void apply() {
+        returnCode = JobState.RUNNING;
         try {
-            Thread.sleep(2000);
+            Thread.sleep(4000);
         } catch (Exception ex) {
-            ex.printStackTrace();
             returnCode = JobState.KILLED;
+            ex.printStackTrace();
             return;
         }
         System.out.println("Did the thing!");

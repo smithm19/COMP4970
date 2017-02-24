@@ -46,12 +46,7 @@ public class SubJob implements SubJobInterface, Runnable {
     }
 
     public JobState getTaskReturnCode() {
-        if (!isRunning()) {
-            return t.getResult();
-        } else {
-            stop();
-            return t.getResult();
-        }
+        return t.getResult();
     }
 
     public boolean isRunning() {

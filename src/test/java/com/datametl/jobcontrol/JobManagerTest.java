@@ -8,6 +8,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.Vector;
 
 import static org.junit.Assert.*;
 
@@ -16,12 +17,12 @@ import static org.junit.Assert.*;
  */
 public class JobManagerTest {
 
-    private List<SubJob> subJobs;
+    private Vector<SubJob> subJobs;
     private Job job;
 
     @Before
     public void setUp() throws Exception {
-        subJobs = new ArrayList<SubJob>();
+        subJobs = new Vector<SubJob>();
         for(int i = 0; i < 3; ++i) {
             subJobs.add(new SubJob(new ExampleTask()));
         }

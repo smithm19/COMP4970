@@ -24,7 +24,7 @@ public class JobManager implements Runnable {
                 "\t\"source\": {\n" +
                 "\t\t\"host_ip\": \"\",\n" +
                 "\t\t\"host_port\": 1234,\n" +
-                "\t\t\"path\": \"\",\n" +
+                "\t\t\"path\": \"test.csv\",\n" +
                 "\t\t\"file_type\": \"\"\n" +
                 "\t},\n" +
                 "\t\"rules\": {\n" +
@@ -123,7 +123,7 @@ public class JobManager implements Runnable {
                     break;
             }
             try {
-                Thread.sleep(500);
+                Thread.sleep(1000);
             } catch (InterruptedException ex) {
                 System.out.println("Uh-oh");
             }

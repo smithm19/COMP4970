@@ -59,14 +59,18 @@ public class SubJobTest {
     public void successfulExecution() throws Exception {
         SubJob test = new SubJob(this.exampleTask);
         test.start();
+        test.stop();
         assertEquals(JobState.SUCCESS, test.getTaskReturnCode());
     }
 
     @Test
     public void badExecution() throws Exception {
+        //INFO: This test is not that good.
         SubJob test = new SubJob(this.exampleTask);
         test.start();
+        assertTrue(test.isRunning());
         test.kill();
+        Thread.sleep(500);
         assertEquals(JobState.KILLED, test.getTaskReturnCode());
     }
 

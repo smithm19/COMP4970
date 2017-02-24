@@ -3,20 +3,21 @@ package com.datametl.jobcontrol;
 import org.json.JSONObject;
 
 import java.util.List;
+import java.util.Vector;
 
 /**
  * Created by mspallino on 1/23/17.
  */
 public class Job implements JobInterface, Runnable {
 
-    private List<SubJob> subJobs;
+    private Vector<SubJob> subJobs;
     private int retries;
     private JobState state;
     private Thread curThread;
     private int curSubJob;
     private JSONObject packet;
 
-    public Job(List<SubJob> subJobs, int retries) {
+    public Job(Vector<SubJob> subJobs, int retries) {
         this.retries = retries;
         this.subJobs = subJobs;
         this.state = JobState.NOT_STARTED;
@@ -28,41 +29,80 @@ public class Job implements JobInterface, Runnable {
     }
 
     public void run() {
-        int currentRetryCount = 0;
+        try {
+            int subJobsSize = subJobs.size();
+            while (curSubJob < subJobsSize) {
+                SubJob sub = subJobs.get(curSubJob);
+                sub.start();
+                curSubJob++;
+                subJobsSize = subJobs.size();
+            }
 
-        int subJobsSize = subJobs.size();
-        while(curSubJob < subJobsSize) {
-            SubJob sub = subJobs.get(curSubJob);
-            sub.start();
-
-            //TODO: Maybe when we really get things going we don't want to do this?
-            sub.stop();
-
-            while(currentRetryCount < retries) {
-                JobState returnState = sub.getTaskReturnCode();
-
-                if (returnState == JobState.FAILED || returnState == JobState.KILLED) {
-                    sub.restart();
-                    state = JobState.FAILED;
-                } else {
+            boolean shouldBreak = false;
+            curSubJob = 0;
+            int currentRetryCount = 0;
+            while (true) {
+                subJobsSize = subJobs.size();
+                if (curSubJob >= subJobsSize) {
+                    curSubJob = 0;
+                }
+                if (subJobsSize == 0) {
                     break;
                 }
-                currentRetryCount++;
-            }
+                SubJob sub = subJobs.get(curSubJob);
+                JobState result = sub.getTaskReturnCode();
 
-            currentRetryCount = 0;
-            if (state == JobState.FAILED || state == JobState.KILLED) {
-                break;
-            }
-            curSubJob++;
-            subJobsSize = subJobs.size();
-        }
-        if (curSubJob == subJobsSize) {
-            // INFO: We've incremented past the number of SubJobs because of the exit condition of the loop above
-            // so we decrement here to put things back to the last SubJob position
-            curSubJob--;
-        }
+                shouldBreak = false;
+                switch (result) {
+                    case KILLED:
+                    case FAILED: {
+                        while (currentRetryCount < retries) {
+                            JobState returnState = sub.getTaskReturnCode();
 
+                            if (returnState == JobState.FAILED || returnState == JobState.KILLED) {
+                                sub.restart();
+                            } else {
+                                break;
+                            }
+                            currentRetryCount++;
+                        }
+                        state = JobState.FAILED;
+                        shouldBreak = true;
+                        currentRetryCount = 0;
+                    }
+                    break;
+                    case SUCCESS:
+                        subJobs.remove(curSubJob);
+                        break;
+                    case NOT_STARTED:
+                    case RUNNING:
+                    default:
+                        break;
+                }
+
+                if (shouldBreak) {
+                    break;
+                }
+
+                curSubJob++;
+                subJobsSize = subJobs.size();
+                if (subJobsSize == 0) {
+                    break;
+                }
+                if (curSubJob == subJobsSize) {
+                    curSubJob = 0;
+                }
+            }
+            if (shouldBreak) {
+                state = JobState.FAILED;
+            } else {
+                state = JobState.SUCCESS;
+            }
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            state = JobState.FAILED;
+        }
+        System.out.println("Finishing job with status: " + state);
     }
 
     public boolean start() {
@@ -93,7 +133,9 @@ public class Job implements JobInterface, Runnable {
     }
 
     public boolean kill() {
-        subJobs.get(curSubJob).kill();
+        for (SubJob sub: subJobs) {
+            sub.kill();
+        }
         curThread.interrupt();
         state = JobState.KILLED;
         return true;
@@ -105,7 +147,8 @@ public class Job implements JobInterface, Runnable {
 
     public boolean addSubJob(SubJob sub) {
         sub.setParent(this);
-        return subJobs.add(sub);
+        subJobs.add(sub);
+        return sub.start();
     }
 
     public JobState getState() {
