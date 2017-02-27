@@ -64,6 +64,7 @@ public class DataSegmentationTask implements Task {
                 }
                 continue;
             }
+            currentBytePosition = packetBytePosition;
             System.out.println("Previous chunk done! Issuing new ExtractSubJob! bytes:" + currentBytePosition);
             currentBytePosition = packetBytePosition;
             ExtractTask nextChunkExtractTask = new ExtractTask();
