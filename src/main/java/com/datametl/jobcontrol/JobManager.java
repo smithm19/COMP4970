@@ -21,54 +21,58 @@ public class JobManager implements Runnable {
     public UUID addJob(Job newJob) {
         UUID newId = UUID.randomUUID();
         String emptyPacketData = "{\n" +
-                "    \"source\": {\n" +
-                "        \"host_ip\": \"\",\n" +
-                "        \"host_port\": 1234,\n" +
-                "        \"path\": \"\",\n" +
-                "        \"file_type\": \"\"\n" +
-                "    },\n" +
-                "    \"rules\": {\n" +
-                "        \"transformations\": {\n" +
-                "            \"transform1\": {\n" +
-                "                \"source_column\": \"test\",\n" +
-                "                \"new_field\": \"test\",\n" +
-                "                \"transform\": \"test\"\n" +
-                "            },\n" +
-                "            \"transform2\": {\n" +
-                "                \"source_column\": \"age\",\n" +
-                "                \"new_field\": null,\n" +
-                "                \"transform\": \"MULT 2\"\n" +
-                "            },\n" +
-                "            \"transform3\": {\n" +
-                "                \"source_column\": \"age\",\n" +
-                "                \"new_field\": \"desty4\",\n" +
-                "                \"transform\": \"MULT 4\"\n" +
-                "            }\n" +
-                "        },\n" +
-                "        \"mappings\": {\n" +
-                "            \"tester1\": \"desty2\",\n" +
-                "            \"tester2\": \"desty1\"\n" +
-                "        },\n" +
-                "        \"filters\": {\n" +
-                "            \"filter1\": {\n" +
-                "                \"source_column\": \"tester4\",\n" +
-                "                \"filter_value\": \"tester\",\n" +
-                "                \"equality_test\": \"eq\"\n" +
-                "            }\n" +
-                "        }\n" +
-                "    },\n" +
-                "    \"destination\": {\n" +
-                "        \"host_ip\": \"\",\n" +
-                "        \"host_port\": 1234,\n" +
-                "        \"username\": \"\",\n" +
-                "        \"password\": \"\",\n" +
-                "        \"storage_type\": \"\"\n" +
-                "    },\n" +
-                "    \"data\": {\n" +
-                "        \"source_header\": [tester1, tester2, age],\n" +
-                "        \"destination_header\": [tester1, tester2, tester3, desty4],\n" +
-                "        \"contents\": [[\"Matt\", \"yes\", \"22\"], [\"Andy\", \"no\", \"18\"]] \n" +
-                "}}\n";
+                "\t\"source\": {\n" +
+                "\t\t\"host_ip\": \"\",\n" +
+                "\t\t\"host_port\": 1234,\n" +
+                "\t\t\"path\": \"test.csv\",\n" +
+                "\t\t\"file_type\": \"\"\n" +
+                "\t},\n" +
+                "\t\"rules\": {\n" +
+                "\t\t\"transformations\": {\n" +
+                "\t\t\t\"transform1\": {\n" +
+                "\t\t\t\t\"source_column\": \"test\",\n" +
+                "\t\t\t\t\"new_field\": \"test\",\n" +
+                "\t\t\t\t\"transform\": \"test\"\n" +
+                "\t\t\t},\n" +
+                "\t\t\t\"transform2\": {\n" +
+                "\t\t\t\t\"source_column\": \"age\",\n" +
+                "\t\t\t\t\"new_field\": null,\n" +
+                "\t\t\t\t\"transform\": \"MULT2\"\n" +
+                "\t\t\t},\n" +
+                "\t\t\t\"transform3\": {\n" +
+                "\t\t\t\t\"source_column\": \"age\",\n" +
+                "\t\t\t\t\"new_field\": \"desty4\",\n" +
+                "\t\t\t\t\"transform\": \"MULT4\"\n" +
+                "\t\t\t}\n" +
+                "\t\t},\n" +
+                "\t\t\"mappings\": {\n" +
+                "\t\t\t\"tester1\": \"desty2\",\n" +
+                "\t\t\t\"tester2\": \"desty1\"\n" +
+                "\t\t},\n" +
+                "\t\t\"filters\": {\n" +
+                "\t\t\t\"filter1\": {\n" +
+                "\t\t\t\t\"source_column\": \"tester4\",\n" +
+                "\t\t\t\t\"filter_value\": \"tester\",\n" +
+                "\t\t\t\t\"equality_test\": \"eq\"\n" +
+                "\t\t\t}\n" +
+                "\t\t}\n" +
+                "\t},\n" +
+                "\t\"destination\": {\n" +
+                "\t\t\"host_ip\": \"\",\n" +
+                "\t\t\"host_port\": 1234,\n" +
+                "\t\t\"username\": \"\",\n" +
+                "\t\t\"password\": \"\",\n" +
+                "\t\t\"storage_type\": \"\"\n" +
+                "\t},\n" +
+                "\t\"data\": {\n" +
+                "\t\t\"source_header\": [\"tester1\", \"tester2\", \"age\"],\n" +
+                "\t\t\"destination_header\": [\"tester1\", \"tester2\", \"tester3\", \"desty4\"],\n" +
+                "\t\t\"contents\": [\n" +
+                "\t\t\t[\"Matt\", \"yes\", \"22\"],\n" +
+                "\t\t\t[\"Andy\", \"no\", \"18\"]\n" +
+                "\t\t]\n" +
+                "\t}\n" +
+                "}";
         JSONObject etlPacket = new JSONObject(emptyPacketData);
         newJob.setETLPacket(etlPacket);
         jobs.put(newId, newJob);
