@@ -60,13 +60,14 @@ public class JobManagerTest {
 
     @Test
     public void  getETLPacket() throws Exception {
+        //TODO: we can do better
         JobManager manager = new JobManager();
         UUID jobId = manager.addJob(job);
 
         JSONObject packet = job.getETLPacket();
         System.out.println(packet);
 
-        assertNotNull(packet.getJSONArray("data"));
+        assertNotNull(packet.getJSONObject("data"));
         assertNotNull(packet.get("source"));
         assertNotNull(packet.get("rules"));
         assertNotNull(packet.get("destination"));
@@ -74,7 +75,7 @@ public class JobManagerTest {
         JSONObject managerPacket = manager.getJobETLPacket(jobId);
         System.out.println(managerPacket);
 
-        assertNotNull(managerPacket.getJSONArray("data"));
+        assertNotNull(managerPacket.getJSONObject("data"));
         assertNotNull(managerPacket.get("source"));
         assertNotNull(managerPacket.get("rules"));
         assertNotNull(managerPacket.get("destination"));

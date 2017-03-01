@@ -30,20 +30,31 @@ public class JobManager implements Runnable {
                 "\t\"rules\": {\n" +
                 "\t\t\"transformations\": {\n" +
                 "\t\t\t\"transform1\": {\n" +
-                "\t\t\t    \"source_column\": \"\",\n" +
-                "\t\t\t\t\"new_field\": \"\",\n" +
-                "\t\t\t\t\"transform\": \"\"\n" +
+                "\t\t\t\t\"source_column\": \"test\",\n" +
+                "\t\t\t\t\"new_field\": \"test\",\n" +
+                "\t\t\t\t\"transform\": \"test\"\n" +
+                "\t\t\t},\n" +
+                "\t\t\t\"transform2\": {\n" +
+                "\t\t\t\t\"source_column\": \"age\",\n" +
+                "\t\t\t\t\"new_field\": null,\n" +
+                "\t\t\t\t\"transform\": \"MULT2\"\n" +
+                "\t\t\t},\n" +
+                "\t\t\t\"transform3\": {\n" +
+                "\t\t\t\t\"source_column\": \"age\",\n" +
+                "\t\t\t\t\"new_field\": \"desty4\",\n" +
+                "\t\t\t\t\"transform\": \"MULT4\"\n" +
                 "\t\t\t}\n" +
                 "\t\t},\n" +
                 "\t\t\"mappings\": {\n" +
-                "\t\t\t\"SOURCE_FIELD\": \"DESTINATION_FIELD\"\n" +
+                "\t\t\t\"tester1\": \"desty2\",\n" +
+                "\t\t\t\"tester2\": \"desty1\"\n" +
                 "\t\t},\n" +
                 "\t\t\"filters\": {\n" +
                 "\t\t\t\"filter1\": {\n" +
-                "\t\t\t\t\"source_column\": \"\",\n" +
-                "\t\t\t\t\"filter_value\": \"\",\n" +
-                "\t\t\t\t\"equality_test\": \"\"\n" +
-                "\t\t\t},\n" +
+                "\t\t\t\t\"source_column\": \"tester4\",\n" +
+                "\t\t\t\t\"filter_value\": \"tester\",\n" +
+                "\t\t\t\t\"equality_test\": \"eq\"\n" +
+                "\t\t\t}\n" +
                 "\t\t}\n" +
                 "\t},\n" +
                 "\t\"destination\": {\n" +
@@ -53,7 +64,14 @@ public class JobManager implements Runnable {
                 "\t\t\"password\": \"\",\n" +
                 "\t\t\"storage_type\": \"\"\n" +
                 "\t},\n" +
-                "\t\"data\": []\n" +
+                "\t\"data\": {\n" +
+                "\t\t\"source_header\": [\"tester1\", \"tester2\", \"age\"],\n" +
+                "\t\t\"destination_header\": [\"tester1\", \"tester2\", \"tester3\", \"desty4\"],\n" +
+                "\t\t\"contents\": [\n" +
+                "\t\t\t[\"Matt\", \"yes\", \"22\"],\n" +
+                "\t\t\t[\"Andy\", \"no\", \"18\"]\n" +
+                "\t\t]\n" +
+                "\t}\n" +
                 "}";
         JSONObject etlPacket = new JSONObject(emptyPacketData);
         newJob.setETLPacket(etlPacket);
