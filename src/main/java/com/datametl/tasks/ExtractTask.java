@@ -58,21 +58,10 @@ public class ExtractTask implements Task{
             this.returnCode = JobState.FAILED;
         }
 
-        /*// TODO: This is just a place holder to pretend that this is doing work, really read the file here.
-        try {
-            System.out.println("working on file... " + filePath);
-            Thread.sleep(2000);
-        } catch(InterruptedException ex) {
-            ex.printStackTrace();
-            returnCode = JobState.FAILED;
-        }
-        etlPacket.put("current_byte_position", bytePos + 20);*/
 
-        /*
-        Task extractTask = new ExtractTask();
-        SubJob newExtractJob = new SubJob(extractTask);
-        boolean status = parent.getParent().addSubJob(newExtractJob);
-        */
+        Task rules = new RulesEngineTask();
+        SubJob newRulesSubJob = new SubJob(rules);
+        boolean status = parent.getParent().addSubJob(newRulesSubJob);
 
         returnCode = JobState.SUCCESS;
 
@@ -136,7 +125,7 @@ public class ExtractTask implements Task{
             inputETLPacket(); //Puts information to ETLPacket
             this.etlPacket.put("current_byte_position", (lastBytePos-bytePos) + bytePos);
 
-            readContent();
+            //readContent();
         }catch(IOException e){
             e.printStackTrace();
             this.returnCode = JobState.FAILED;
@@ -265,7 +254,7 @@ public class ExtractTask implements Task{
             }
 
             this.etlPacket.put("current_byte_position", (lastBytePos - bytePos)+bytePos);
-            readContent();
+            //readContent();
 
         }catch(IOException e){
             e.printStackTrace();
@@ -322,14 +311,14 @@ public class ExtractTask implements Task{
 
     private void inputETLPacket(){
 
-        JSONObject data = new JSONObject();
-        JSONArray contents = this.etlPacket.getJSONObject("data").getJSONArray("contents");
+        JSONObject data = this.etlPacket.getJSONObject("data");
+        JSONArray contents = data.getJSONArray("contents");
 
         for(List<Object> listString : rows){
             contents.put(listString);
         }
         data.put("contents",contents);
-        data.put("header",fieldName);
+        data.put("source_header",fieldName);
         etlPacket.put("data",data);
     }
 

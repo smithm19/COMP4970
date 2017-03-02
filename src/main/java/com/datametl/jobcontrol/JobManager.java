@@ -31,19 +31,19 @@ public class JobManager implements Runnable {
                 "\t\"rules\": {\n" +
                 "\t\t\"transformations\": {\n" +
                 "\t\t\t\"transform1\": {\n" +
-                "\t\t\t\t\"source_column\": \"test\",\n" +
-                "\t\t\t\t\"new_field\": \"test\",\n" +
-                "\t\t\t\t\"transform\": \"test\"\n" +
+                "\t\t\t\t\"source_column\": \"id\",\n" +
+                "\t\t\t\t\"new_field\": \"tester3\",\n" +
+                "\t\t\t\t\"transform\": \"ADD 3\"\n" +
                 "\t\t\t},\n" +
                 "\t\t\t\"transform2\": {\n" +
-                "\t\t\t\t\"source_column\": \"age\",\n" +
+                "\t\t\t\t\"source_column\": \"id\",\n" +
                 "\t\t\t\t\"new_field\": null,\n" +
-                "\t\t\t\t\"transform\": \"MULT2\"\n" +
+                "\t\t\t\t\"transform\": \"MULT 2\"\n" +
                 "\t\t\t},\n" +
                 "\t\t\t\"transform3\": {\n" +
-                "\t\t\t\t\"source_column\": \"age\",\n" +
+                "\t\t\t\t\"source_column\": \"id\",\n" +
                 "\t\t\t\t\"new_field\": \"desty4\",\n" +
-                "\t\t\t\t\"transform\": \"MULT4\"\n" +
+                "\t\t\t\t\"transform\": \"MULT 4\"\n" +
                 "\t\t\t}\n" +
                 "\t\t},\n" +
                 "\t\t\"mappings\": {\n" +
@@ -66,7 +66,7 @@ public class JobManager implements Runnable {
                 "\t\t\"storage_type\": \"\"\n" +
                 "\t},\n" +
                 "\t\"data\": {\n" +
-                "\t\t\"source_header\": [\"tester1\", \"tester2\", \"age\"],\n" +
+                "\t\t\"source_header\": [],\n" +
                 "\t\t\"destination_header\": [\"tester1\", \"tester2\", \"tester3\", \"desty4\"],\n" +
                 "\t\t\"contents\": []\n" +
                 "\t}\n" +
