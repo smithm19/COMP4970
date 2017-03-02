@@ -21,15 +21,15 @@ public class WorkflowTest {
 
     @Test
     public void run() throws Exception {
-        File f = new File("test.csv");
-        String data = "\"fName\",\"lName\",\"age\"\n\"mike\",\"spall\",\"22\"\n";
-        f.createNewFile();
-        BufferedWriter bw = new BufferedWriter(new PrintWriter(f));
-        bw.write(data);
-        bw.close();
+//        File f = new File("test.csv");
+//        String data = "\"fName\",\"lName\",\"age\"\n\"mike\",\"spall\",\"22\"\n";
+//        f.createNewFile();
+//        BufferedWriter bw = new BufferedWriter(new PrintWriter(f));
+//        bw.write(data);
+//        bw.close();
 
         Vector<SubJob> subJobs = new Vector<SubJob>();
-        Task dst = new DataSegmentationTask(20);
+        Task dst = new DataSegmentationTask(250);
         SubJob dstSubJob = new SubJob(dst);
         subJobs.add(dstSubJob);
         Job job = new Job(subJobs, 3);
@@ -42,7 +42,7 @@ public class WorkflowTest {
         Thread.sleep(2000);
         assertEquals(job.getState(), JobState.SUCCESS);
 
-        f.delete();
+//        f.delete();
     }
 
 }

@@ -33,6 +33,7 @@ public class DataSegmentationTask implements Task {
             throw new RuntimeException("Could not find file!");
         }
         maxFilePosition = fin.length();
+        System.out.println(maxFilePosition);
         etlPacket.put("documents_to_read", documentsPerChunk);
         etlPacket.put("current_byte_position", currentBytePosition);
         
@@ -72,6 +73,7 @@ public class DataSegmentationTask implements Task {
             parent.getParent().addSubJob(nextChunkExtractJob);
         }
 
+        System.out.println(etlPacket+"\n");
         returnCode = JobState.SUCCESS;
     }
 
