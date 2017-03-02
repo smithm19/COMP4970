@@ -8,6 +8,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.Vector;
 
 import static org.junit.Assert.*;
 
@@ -16,12 +17,12 @@ import static org.junit.Assert.*;
  */
 public class JobManagerTest {
 
-    private List<SubJob> subJobs;
+    private Vector<SubJob> subJobs;
     private Job job;
 
     @Before
     public void setUp() throws Exception {
-        subJobs = new ArrayList<SubJob>();
+        subJobs = new Vector<SubJob>();
         for(int i = 0; i < 3; ++i) {
             subJobs.add(new SubJob(new ExampleTask()));
         }
@@ -59,13 +60,14 @@ public class JobManagerTest {
 
     @Test
     public void  getETLPacket() throws Exception {
+        //TODO: we can do better
         JobManager manager = new JobManager();
         UUID jobId = manager.addJob(job);
 
         JSONObject packet = job.getETLPacket();
         System.out.println(packet);
 
-        assertNotNull(packet.getJSONArray("data"));
+        assertNotNull(packet.getJSONObject("data"));
         assertNotNull(packet.get("source"));
         assertNotNull(packet.get("rules"));
         assertNotNull(packet.get("destination"));
@@ -73,7 +75,7 @@ public class JobManagerTest {
         JSONObject managerPacket = manager.getJobETLPacket(jobId);
         System.out.println(managerPacket);
 
-        assertNotNull(managerPacket.getJSONArray("data"));
+        assertNotNull(managerPacket.getJSONObject("data"));
         assertNotNull(managerPacket.get("source"));
         assertNotNull(managerPacket.get("rules"));
         assertNotNull(managerPacket.get("destination"));
