@@ -73,7 +73,8 @@ public class DataSegmentationTask implements Task {
             parent.getParent().addSubJob(nextChunkExtractJob);
         }
 
-        System.out.println(etlPacket+"\n");
+        System.out.println("DataSegmentationTask - ETLPacket:\n"+etlPacket+"\n");
+
         returnCode = JobState.SUCCESS;
     }
 
