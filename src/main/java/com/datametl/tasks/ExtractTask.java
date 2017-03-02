@@ -119,11 +119,11 @@ public class ExtractTask implements Task{
             }
 
             //System.out.println("LINES READ: "+reader.getLinesRead());
-            lastBytePos = raf.getFilePointer();
+            this.lastBytePos = raf.getFilePointer();
 
             reader.close();
             inputETLPacket(); //Puts information to ETLPacket
-            this.etlPacket.put("current_byte_position", (lastBytePos-bytePos) + bytePos);
+            this.etlPacket.put("current_byte_position", (this.lastBytePos-this.bytePos) + this.bytePos);
 
             //readContent();
         }catch(IOException e){
@@ -158,11 +158,12 @@ public class ExtractTask implements Task{
 //            parser.close();
 
 
-            RandomAccessFile randomAccessFile = new RandomAccessFile(filePath,"r");
+            RandomAccessFile randomAccessFile = new RandomAccessFile(this.filePath,"r");
 
             StringBuffer stringBuffer = new StringBuffer();
             String line;
-            if(bytePos==0){
+
+            if(this.bytePos==0){
                 line = randomAccessFile.readLine();
             }else{
                 randomAccessFile.seek(bytePos);
@@ -190,19 +191,20 @@ public class ExtractTask implements Task{
                     if (stringBuffer.charAt(stringBuffer.length() - 1) == ',') {
                         tempLine = stringBuffer.substring(0, stringBuffer.length() - 1);
                         convertSuccess=convertToJSONObject(tempLine);
-                        stringBuffer.setLength(0);
+
                     }
                     else if(stringBuffer.charAt(stringBuffer.length() - 1) == ']') {
                         tempLine = stringBuffer.substring(0, stringBuffer.length() - 1);
                         convertSuccess=convertToJSONObject(tempLine);
-                        stringBuffer.setLength(0);
                     }
-                    else if(stringBuffer.charAt(stringBuffer.length() - 1) == '}'){
-                        tempLine = stringBuffer.substring(0, stringBuffer.length() - 1);
-                        convertSuccess=convertToJSONObject(tempLine);
-                        stringBuffer.setLength(0);
-                    }
+//                    else if(stringBuffer.charAt(stringBuffer.length() - 1) == '}'){
+//                        tempLine = stringBuffer.substring(0, stringBuffer.length() - 1);
+//                        convertSuccess=convertToJSONObject(tempLine);
+//                    }
 
+                    if(convertSuccess){
+                        stringBuffer.setLength(0);
+                    }
 
                 } else {
                     //If not the first line, append
@@ -212,16 +214,17 @@ public class ExtractTask implements Task{
                     if (stringBuffer.charAt(stringBuffer.length() - 1) == ',') {
                         tempLine = stringBuffer.substring(0, stringBuffer.length() - 1);
                         convertSuccess=convertToJSONObject(tempLine);
-                        stringBuffer.setLength(0);
                     }
                     else if(stringBuffer.charAt(stringBuffer.length() - 1) == ']') {
                         tempLine = stringBuffer.substring(0, stringBuffer.length() - 1);
                         convertSuccess=convertToJSONObject(tempLine);
-                        stringBuffer.setLength(0);
                     }
-                    else if(stringBuffer.charAt(stringBuffer.length() - 1) == '}'){
-                        tempLine = stringBuffer.substring(0, stringBuffer.length() - 1);
-                        convertSuccess=convertToJSONObject(tempLine);
+//                    else if(stringBuffer.charAt(stringBuffer.length() - 1) == '}'){
+//                        tempLine = stringBuffer.substring(0, stringBuffer.length() - 1);
+//                        convertSuccess=convertToJSONObject(tempLine);
+//                    }
+
+                    if(convertSuccess){
                         stringBuffer.setLength(0);
                     }
 
@@ -237,23 +240,25 @@ public class ExtractTask implements Task{
 
                 if(convertSuccess){
                     docsRead++;
-                    if(docsRead>=docToRead){
-                        lastBytePos = randomAccessFile.getFilePointer();
+                    if(docsRead>=this.docToRead){
+                        this.lastBytePos = randomAccessFile.getFilePointer();
                         break;
                     }
                 }
 
-                lastBytePos = randomAccessFile.getFilePointer();
+                this.lastBytePos = randomAccessFile.getFilePointer();
             }
 
             if(breakCount>=maxBreakCount){
+                randomAccessFile.close();
                 this.returnCode = JobState.FAILED;
                 throw new JSONParsingException("Parsing JSONObject timed out. File is either invalid, formatted incorrectly or the object is too large.");
             }else{
+                randomAccessFile.close();
                 inputETLPacket();
             }
 
-            this.etlPacket.put("current_byte_position", (lastBytePos - bytePos)+bytePos);
+            this.etlPacket.put("current_byte_position", (this.lastBytePos - this.bytePos)+this.bytePos);
             //readContent();
 
         }catch(IOException e){
@@ -314,16 +319,23 @@ public class ExtractTask implements Task{
         JSONObject data = this.etlPacket.getJSONObject("data");
         JSONArray contents = data.getJSONArray("contents");
 
-        for(List<Object> listString : rows){
+        for(List<Object> listString : this.rows){
             contents.put(listString);
         }
+
+        if(etlPacket.getJSONObject("data").get("header").equals("")) {
+            this.etlPacket.getJSONObject("data").put("source_header", this.fieldName);
+        }
+
         data.put("contents",contents);
-        data.put("source_header",fieldName);
-        etlPacket.put("data",data);
+//        this.etlPacket.put("data",data);
+
+        System.out.println("INPUT - ExtractTask - ETLPacket:\n"+this.etlPacket+"\n");
     }
 
     private void readContent(){
-        JSONObject etlPacket = parent.getETLPacketFromParent();
-        System.out.println(etlPacket+"\n");
+        System.out.println("READCONTENT - fieldName: "+this.fieldName);
+
+        System.out.println("READCONTENT - ExtractTask - ETLPacket:\n"+this.etlPacket+"\n");
     }
 }

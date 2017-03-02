@@ -68,7 +68,8 @@ public class JobManager implements Runnable {
                 "\t\"data\": {\n" +
                 "\t\t\"source_header\": [],\n" +
                 "\t\t\"destination_header\": [\"tester1\", \"tester2\", \"tester3\", \"desty4\"],\n" +
-                "\t\t\"contents\": []\n" +
+                "\t\t\"contents\": [],\n" +
+                "\t\t\"header\": \"\"\n" +
                 "\t}\n" +
                 "}";
         JSONObject etlPacket = new JSONObject(emptyPacketData);
