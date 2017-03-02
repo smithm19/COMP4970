@@ -18,14 +18,15 @@ public class JobManager implements Runnable {
         curThread.start();
     }
 
+    //Path & file type has been altered
     public UUID addJob(Job newJob) {
         UUID newId = UUID.randomUUID();
         String emptyPacketData = "{\n" +
                 "\t\"source\": {\n" +
                 "\t\t\"host_ip\": \"\",\n" +
                 "\t\t\"host_port\": 1234,\n" +
-                "\t\t\"path\": \"test.csv\",\n" +
-                "\t\t\"file_type\": \"\"\n" +
+                "\t\t\"path\": \"MOCK_DATA.csv\",\n" +
+                "\t\t\"file_type\": \"csv\"\n" +
                 "\t},\n" +
                 "\t\"rules\": {\n" +
                 "\t\t\"transformations\": {\n" +
@@ -67,10 +68,7 @@ public class JobManager implements Runnable {
                 "\t\"data\": {\n" +
                 "\t\t\"source_header\": [\"tester1\", \"tester2\", \"age\"],\n" +
                 "\t\t\"destination_header\": [\"tester1\", \"tester2\", \"tester3\", \"desty4\"],\n" +
-                "\t\t\"contents\": [\n" +
-                "\t\t\t[\"Matt\", \"yes\", \"22\"],\n" +
-                "\t\t\t[\"Andy\", \"no\", \"18\"]\n" +
-                "\t\t]\n" +
+                "\t\t\"contents\": []\n" +
                 "\t}\n" +
                 "}";
         JSONObject etlPacket = new JSONObject(emptyPacketData);
