@@ -5,7 +5,6 @@ import com.datametl.jobcontrol.JobState;
 import com.datametl.jobcontrol.SubJob;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.opencsv.CSVParser;
 import com.opencsv.CSVReader;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -63,6 +62,7 @@ public class ExtractTask implements Task{
         SubJob newRulesSubJob = new SubJob(rules);
         boolean status = parent.getParent().addSubJob(newRulesSubJob);
 
+        readContent();
         returnCode = JobState.SUCCESS;
 
     }
@@ -323,18 +323,18 @@ public class ExtractTask implements Task{
             contents.put(listString);
         }
 
-        if(etlPacket.getJSONObject("data").get("header").equals("")) {
+        if(etlPacket.getJSONObject("data").get("source_header").equals("")) {
             this.etlPacket.getJSONObject("data").put("source_header", this.fieldName);
         }
 
         data.put("contents",contents);
 //        this.etlPacket.put("data",data);
 
-        System.out.println("INPUT - ExtractTask - ETLPacket:\n"+this.etlPacket+"\n");
+        //System.out.println("INPUT - ExtractTask - ETLPacket:\n"+this.etlPacket+"\n");
     }
 
     private void readContent(){
-        System.out.println("READCONTENT - fieldName: "+this.fieldName);
+        //System.out.println("READCONTENT - fieldName: "+this.fieldName);
 
         System.out.println("READCONTENT - ExtractTask - ETLPacket:\n"+this.etlPacket+"\n");
     }
