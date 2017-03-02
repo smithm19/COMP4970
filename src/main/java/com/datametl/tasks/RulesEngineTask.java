@@ -27,6 +27,8 @@ public class RulesEngineTask implements Task {
 
         JSONObject newPacket = parent.getETLPacketFromParent();
         idiot(newPacket);
+
+        current_state = JobState.SUCCESS;
     }
 
 
@@ -51,21 +53,21 @@ public class RulesEngineTask implements Task {
         JSONObject filters = rules.getJSONObject("filters");
         JSONObject packetData = pckt.getJSONObject("data");
         JSONArray dataContents = packetData.getJSONArray("contents");
-        sourceHeader = packetData.getJSONArray("source_header");
-        destinationHeader = packetData.getJSONArray("destination_header");
-        newHeader = sourceHeader;
+        this.sourceHeader = packetData.getJSONArray("source_header");
+        this.destinationHeader = packetData.getJSONArray("destination_header");
+        this.newHeader = sourceHeader;
 
         preTransform(transforms);
         JSONArray headersToKeep = headerIndexesToKeep();
-        System.out.println("destination header:" + destinationHeader);
         //loop through lines
         for (int x =0; x<dataContents.length(); x++){
             JSONArray line = getLine(dataContents, x);
             //line = doMappings(line);
+            System.out.println("Pre Transform: " + line);
             line = doTransformations(transforms,line);
             //line=editLine(line,headersToKeep);
             System.out.println("Current Line: " + line);
-            System.out.println(headersToKeep);
+           //System.out.println("headersToKeep: " + headersToKeep);
             //line = doFilters(line);
             dataContents.put(x, line);
 
@@ -100,41 +102,99 @@ public class RulesEngineTask implements Task {
         for (int x=1; x<transforms.length()+1;x++) {
             String curTransform = "transform" + x;
             String newField = getCurrTransformNewField(transforms, curTransform);
+            int indexToGet;
+            String value;
+            String transformValue;
+            String curSource;
+
+
 
             //can be MULT, DIV, POW, ADD, SUB
             if (getCurrTransformSymbol(transforms, curTransform).equals("MULT")) {
                 if(newField.equals("")) {
-                    line.put(getArrayIndex(sourceHeader, getCurrTransformSource(transforms, curTransform)), getCurrTransformValue(transforms, curTransform) * Double.parseDouble(line.get(getArrayIndex(sourceHeader, getCurrTransformSource(transforms, curTransform))).toString()));
+                    transformValue = getCurrTransformValue(transforms,curTransform);
+                    curSource = getCurrTransformSource(transforms,curTransform);
+                    indexToGet  = getArrayIndex(this.sourceHeader,curSource);
+                    value = line.get(indexToGet).toString();
+
+                    line.put(indexToGet, Double.parseDouble(transformValue) * Double.parseDouble(value));
+
                 }else{
-                    line.put(getArrayIndex(newHeader,newField),getCurrTransformValue(transforms, curTransform) * Double.parseDouble(line.get(getArrayIndex(sourceHeader, getCurrTransformSource(transforms, curTransform))).toString()));
+                    transformValue = getCurrTransformValue(transforms,curTransform);
+                    curSource = getCurrTransformSource(transforms,curTransform);
+                    indexToGet= getArrayIndex(this.newHeader,newField);
+                    value = line.get(getArrayIndex(sourceHeader,curSource)).toString();
+
+                    line.put(indexToGet,Double.parseDouble(transformValue) * Double.parseDouble(value));
                 }
             }
             else if (getCurrTransformSymbol(transforms, curTransform).equals("DIV")) {
                 if(newField.equals("")) {
-                    line.put(getArrayIndex(sourceHeader,getCurrTransformSource(transforms, curTransform)), getCurrTransformValue(transforms,curTransform) / Double.parseDouble(line.get(getArrayIndex(sourceHeader,getCurrTransformSource(transforms,curTransform))).toString()));
+                    transformValue = getCurrTransformValue(transforms,curTransform);
+                    curSource = getCurrTransformSource(transforms,curTransform);
+                    indexToGet  = getArrayIndex(this.sourceHeader,curSource);
+                    value = line.get(indexToGet).toString();
+
+                    line.put(indexToGet, Double.parseDouble(transformValue) / Double.parseDouble(value));
                 }else{
-                    line.put(getArrayIndex(newHeader, newField), getCurrTransformValue(transforms,curTransform) / Double.parseDouble(line.get(getArrayIndex(sourceHeader,getCurrTransformSource(transforms,curTransform))).toString()));
+                    transformValue = getCurrTransformValue(transforms,curTransform);
+                    curSource = getCurrTransformSource(transforms,curTransform);
+                    indexToGet= getArrayIndex(this.newHeader,newField);
+                    value = line.get(getArrayIndex(sourceHeader,curSource)).toString();
+
+                    line.put(indexToGet,Double.parseDouble(transformValue) / Double.parseDouble(value));
                 }
             }
             else if (getCurrTransformSymbol(transforms, curTransform).equals("ADD")) {
                 if(newField.equals("")) {
-                    line.put(getArrayIndex(sourceHeader,getCurrTransformSource(transforms,curTransform)), getCurrTransformValue(transforms,curTransform) + Double.parseDouble(line.get(getArrayIndex(sourceHeader,getCurrTransformSource(transforms,curTransform))).toString()));
+                    transformValue = getCurrTransformValue(transforms,curTransform);
+                    curSource = getCurrTransformSource(transforms,curTransform);
+                    indexToGet  = getArrayIndex(this.sourceHeader,curSource);
+                    value = line.get(indexToGet).toString();
+
+                    line.put(indexToGet, Double.parseDouble(transformValue) + Double.parseDouble(value));
                 }else{
-                    line.put(getArrayIndex(newHeader,newField), getCurrTransformValue(transforms,curTransform) + Double.parseDouble(line.get(getArrayIndex(sourceHeader,getCurrTransformSource(transforms,curTransform))).toString()));
+                    transformValue = getCurrTransformValue(transforms,curTransform);
+                    curSource = getCurrTransformSource(transforms,curTransform);
+                    indexToGet= getArrayIndex(this.newHeader,newField);
+                    value = line.get(getArrayIndex(sourceHeader,curSource)).toString();
+
+                    line.put(indexToGet,Double.parseDouble(transformValue) + Double.parseDouble(value));
                 }
             }
             else if (getCurrTransformSymbol(transforms, curTransform).equals("SUB")) {
                 if(newField.equals("")) {
-                    line.put(getArrayIndex(sourceHeader, getCurrTransformSource(transforms,curTransform)), getCurrTransformValue(transforms,curTransform) - Double.parseDouble(line.get(getArrayIndex(sourceHeader,getCurrTransformSource(transforms,curTransform))).toString()));
+                    transformValue = getCurrTransformValue(transforms,curTransform);
+                    curSource = getCurrTransformSource(transforms,curTransform);
+                    indexToGet  = getArrayIndex(this.sourceHeader,curSource);
+                    value = line.get(indexToGet).toString();
+
+                    line.put(indexToGet, Double.parseDouble(transformValue) - Double.parseDouble(value));
                 }else{
-                    line.put(getArrayIndex(newHeader, newField), getCurrTransformValue(transforms,curTransform) - Double.parseDouble(line.get(getArrayIndex(sourceHeader,getCurrTransformSource(transforms,curTransform))).toString()));
+                    transformValue = getCurrTransformValue(transforms,curTransform);
+                    curSource = getCurrTransformSource(transforms,curTransform);
+                    indexToGet= getArrayIndex(this.newHeader,newField);
+                    value = line.get(getArrayIndex(sourceHeader,curSource)).toString();
+
+                    line.put(indexToGet,Double.parseDouble(transformValue) - Double.parseDouble(value));
                 }
             }
             else if (getCurrTransformSymbol(transforms, curTransform).equals("POW")) {
                 if(newField.equals("")) {
-                    line.put(getArrayIndex(sourceHeader,getCurrTransformSource(transforms,curTransform)), Math.pow(getCurrTransformValue(transforms,curTransform) , Double.parseDouble(line.get(getArrayIndex(sourceHeader,getCurrTransformSource(transforms,curTransform))).toString())));
+                    transformValue = getCurrTransformValue(transforms,curTransform);
+                    curSource = getCurrTransformSource(transforms,curTransform);
+                    indexToGet  = getArrayIndex(this.sourceHeader,curSource);
+                    value = line.get(indexToGet).toString();
+
+                    line.put(indexToGet, Math.pow(Double.parseDouble(transformValue), Double.parseDouble(value)));
                 }else{
-                    line.put(getArrayIndex(newHeader, newField), Math.pow(getCurrTransformValue(transforms,curTransform) , Double.parseDouble(line.get(getArrayIndex(sourceHeader,getCurrTransformSource(transforms,curTransform))).toString())));
+                    transformValue = getCurrTransformValue(transforms,curTransform);
+                    curSource = getCurrTransformSource(transforms,curTransform);
+                    indexToGet= getArrayIndex(this.newHeader,newField);
+                    value = line.get(getArrayIndex(sourceHeader,curSource)).toString();
+
+                    line.put(indexToGet,Double.parseDouble(transformValue) - Double.parseDouble(value));
+                    line.put(indexToGet, Math.pow(Double.parseDouble(transformValue),Double.parseDouble(value)));
                 }
 
             }
@@ -174,8 +234,8 @@ public class RulesEngineTask implements Task {
         return trans.getJSONObject(curTransform).getString("source_column");
     }
 
-    private double getCurrTransformValue(JSONObject trans, String curTransform){
-        return Double.parseDouble(trans.getJSONObject(curTransform).getString("transform").split(" ")[1]);
+    private String getCurrTransformValue(JSONObject trans, String curTransform){
+        return trans.getJSONObject(curTransform).getString("transform").split(" ")[1];
     }
     private String getCurrTransformSymbol(JSONObject trans,String curTransform){
         return trans.getJSONObject(curTransform).getString("transform").split(" ")[0];
