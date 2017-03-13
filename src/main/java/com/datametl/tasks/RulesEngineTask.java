@@ -12,8 +12,7 @@ import java.util.ArrayList;
  */
 public class RulesEngineTask implements Task {
 
-    //TODO: Make newHeader == sourceHeader. Then add whatever isn't in newHeader from DestinationHeader to newHeader.
-    //TODO: Now remove everything that isn't in destinationHeader from newHeader then sort it.
+    //TODO: Put modified data back in the packet
 
     private JobState current_state = JobState.RUNNING;
     private SubJob parent = null;
@@ -57,19 +56,18 @@ public class RulesEngineTask implements Task {
         this.destinationHeader = packetData.getJSONArray("destination_header");
         this.newHeader = sourceHeader;
 
-        preTransform(transforms);
+        makeNewHeader(transforms);
         JSONArray headersToKeep = headerIndexesToKeep();
-        //loop through lines
+        //loop through each line
         for (int x =0; x<dataContents.length(); x++){
             JSONArray line = getLine(dataContents, x);
-            //line = doMappings(line);
             System.out.println("Pre Transform: " + line);
+            line = doFilters(line,filters);
             line = doTransformations(transforms,line);
-            //line=editLine(line,headersToKeep);
+            line = doMappings(line, headersToKeep);
             System.out.println("Current Line: " + line);
-           //System.out.println("headersToKeep: " + headersToKeep);
-            //line = doFilters(line);
             dataContents.put(x, line);
+            System.out.println("Headers to Keep"+headersToKeep);
 
 
            }
@@ -81,20 +79,13 @@ public class RulesEngineTask implements Task {
         return content.getJSONArray(line_num);
     }
 
-    private JSONArray doMappings(JSONArray line) {
-        int line_length = line.length();
-        List<Integer> del_list = new ArrayList<Integer>();
-        for (int x = 0; x < line_length; x++) {
-            if (line.get(x).equals("Matt")) {
-                del_list.add(x);
-            }
-        }
-        for (int y = 0; y < del_list.size(); y++) {
-            line.remove(del_list.get(y));
+    private JSONArray doMappings(JSONArray line, JSONArray toKeep) {
+        JSONArray sendback = new JSONArray();
+        for (int x =0; x<toKeep.length();x++){
+            sendback.put(x, line.get(toKeep.getInt(x)));
         }
 
-
-        return line;
+        return sendback;
     }
 
     private JSONArray doTransformations(JSONObject transforms,JSONArray line) {
@@ -205,7 +196,40 @@ public class RulesEngineTask implements Task {
         return line;
     }
 
-    private JSONArray doFilters(JSONArray line) {
+    private JSONArray doFilters(JSONArray line,JSONObject filters) {
+        for (int x=1; x<filters.length()+1;x++) {
+            String curFilter = "filter" + x;
+            String curFilterColumn = filters.getJSONObject(curFilter).get("source_column").toString();
+            int indexOfColumn = getArrayIndex(sourceHeader,curFilterColumn);
+            //String curFilterValue = filters.getJSONObject(curFilter).get("filter_value").toString();
+            String curFilterSymbol = filters.getJSONObject(curFilter).get("equality_test").toString();
+            //String curFilterNumber = curFilterValue.split(" ")[1];
+
+            if (curFilterSymbol.equals("EQ")) {
+                if (filters.getJSONObject(curFilter).get("filter_value") instanceof String) {
+                    if (filters.getJSONObject(curFilter).get("filter_value").equals(line.get(indexOfColumn))) {
+                        System.out.println("THE INFO YOU ARE LOOKING FOR " + line.get(indexOfColumn));
+                    }
+                }
+                if (filters.getJSONObject(curFilter).get("filter_value") instanceof Double) {
+                    System.out.println("INSIDEINSIDEINSIDEINSIDE");
+                    if (filters.getJSONObject(curFilter).get("filter_value") == line.get(indexOfColumn)) {
+                        System.out.println("THE INFO YOU ARE LOOKING FOR " + line.get(indexOfColumn));
+                    }
+                }
+                if (filters.getJSONObject(curFilter).get("filter_value") instanceof Integer) {
+                    if (filters.getJSONObject(curFilter).getInt("filter_value") == Integer.parseInt(line.get(indexOfColumn).toString())) {
+                        System.out.println("THE INFO YOU ARE LOOKING FOR " + line.get(indexOfColumn));
+                    }
+                }
+            }
+
+
+
+            System.out.println("IN FILTER: " + curFilterColumn);
+
+        }
+
 
         return line;
     }
@@ -241,7 +265,7 @@ public class RulesEngineTask implements Task {
         return trans.getJSONObject(curTransform).getString("transform").split(" ")[0];
     }
     //Makes newHeader
-    private void preTransform(JSONObject transforms){
+    private void makeNewHeader(JSONObject transforms){
         for (int x=1; x<transforms.length()+1;x++) {
             String curTransform = "transform" + x;
             String newField = getCurrTransformNewField(transforms, curTransform);
@@ -251,7 +275,6 @@ public class RulesEngineTask implements Task {
             } else if (checkHeaderDuplicate(newHeader, newField)) {
                 newHeader.put(newHeader.length(), newField);
             }
-            System.out.println("newHeader: " + newHeader);
 
         }
     }
