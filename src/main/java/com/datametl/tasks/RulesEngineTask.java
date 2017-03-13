@@ -24,9 +24,10 @@ public class RulesEngineTask implements Task {
 
     public void apply() {
 
-        JSONObject newPacket = parent.getETLPacketFromParent();
+        JSONObject newPacket = parent.getETLPacket();
         idiot(newPacket);
 
+        System.out.println("RULES: " + newPacket);
         current_state = JobState.SUCCESS;
     }
 

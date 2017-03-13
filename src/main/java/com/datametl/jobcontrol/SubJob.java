@@ -11,6 +11,7 @@ public class SubJob implements SubJobInterface, Runnable {
     private Task t;
     private Thread curThread;
     private Job parent;
+    private JSONObject etlPacket;
 
     public SubJob(Task t) {
         this.t = t;
@@ -65,7 +66,18 @@ public class SubJob implements SubJobInterface, Runnable {
         this.parent = parent;
     }
 
-    public JSONObject getETLPacketFromParent() {
-        return parent != null ? parent.getETLPacket() : null;
+    public JSONObject getETLPacket() {
+        if (etlPacket == null) {
+            if (parent != null) {
+                etlPacket = parent.getETLPacket();
+            } else {
+                return null;
+            }
+        }
+        return etlPacket;
+    }
+
+    public void setETLPacket(JSONObject etlPacket) {
+        this.etlPacket = etlPacket;
     }
 }
