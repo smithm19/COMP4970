@@ -25,7 +25,7 @@ public class DataSegmentationTask implements Task {
 
     public void apply() {
         returnCode = JobState.RUNNING;
-        JSONObject etlPacket = parent.getETLPacketFromParent();
+        JSONObject etlPacket = parent.getETLPacket();
         String filePath = etlPacket.getJSONObject("source").getString("path");
         File fin = new File(filePath);
         if (fin.exists() == false) {
@@ -39,6 +39,7 @@ public class DataSegmentationTask implements Task {
         
         Task extractTask = new ExtractTask();
         SubJob newExtractJob = new SubJob(extractTask);
+        newExtractJob.setETLPacket(etlPacket);
         boolean status = parent.getParent().addSubJob(newExtractJob);
         if (status) {
             System.out.println("Added initial ExtractSubJob");
@@ -66,10 +67,14 @@ public class DataSegmentationTask implements Task {
                 continue;
             }
             currentBytePosition = packetBytePosition;
+            if (currentBytePosition == maxFilePosition) {
+                break;
+            }
             System.out.println("Previous chunk done! Issuing new ExtractSubJob! bytes:" + currentBytePosition);
             currentBytePosition = packetBytePosition;
             ExtractTask nextChunkExtractTask = new ExtractTask();
             SubJob nextChunkExtractJob = new SubJob(nextChunkExtractTask);
+            nextChunkExtractJob.setETLPacket(etlPacket);
             parent.getParent().addSubJob(nextChunkExtractJob);
         }
 

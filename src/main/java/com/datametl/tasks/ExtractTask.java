@@ -37,7 +37,7 @@ public class ExtractTask implements Task{
 
     public void apply() {
         this.returnCode = JobState.RUNNING;
-        this.etlPacket = parent.getETLPacketFromParent();
+        this.etlPacket = parent.getETLPacket();
         this.filePath = etlPacket.getJSONObject("source").getString("path");
         this.fileType = etlPacket.getJSONObject("source").getString("file_type");
         this.docToRead = etlPacket.getInt("documents_to_read");
@@ -60,6 +60,12 @@ public class ExtractTask implements Task{
 
         Task rules = new RulesEngineTask();
         SubJob newRulesSubJob = new SubJob(rules);
+
+        // INFO: Give RulesEngine a copy and reset the contents
+        newRulesSubJob.setETLPacket(new JSONObject(etlPacket.toString()));
+        JSONArray empty = new JSONArray();
+        etlPacket.getJSONObject("data").put("contents", empty);
+
         boolean status = parent.getParent().addSubJob(newRulesSubJob);
 
         readContent();

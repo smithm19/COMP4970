@@ -6,6 +6,7 @@ apply plugin: 'war'
 apply plugin: 'com.bmuschko.tomcat'
 
 sourceCompatibility = 1.5
+targetCompatibility = 1.5
 
 repositories {
     mavenCentral()
