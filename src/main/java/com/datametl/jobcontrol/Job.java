@@ -57,6 +57,7 @@ public class Job implements JobInterface, Runnable {
                     case KILLED:
                     case FAILED: {
                         while (currentRetryCount < retries) {
+                            System.out.println("Retrying...");
                             JobState returnState = sub.getTaskReturnCode();
 
                             if (returnState == JobState.FAILED || returnState == JobState.KILLED) {

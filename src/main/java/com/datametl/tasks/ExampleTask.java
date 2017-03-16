@@ -27,7 +27,7 @@ public class ExampleTask implements Task {
         System.out.println("Did the thing!");
 
         if (parent != null) {
-            System.out.println("Got my parent's ETL packet!: " + parent.getETLPacketFromParent());
+            System.out.println("Got my parent's ETL packet!: " + parent.getETLPacket());
         }
         returnCode = JobState.SUCCESS;
     }

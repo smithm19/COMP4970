@@ -14,5 +14,6 @@ public interface SubJobInterface {
     JobState getTaskReturnCode();
     Job getParent();
     void setParent(Job parent);
-    JSONObject getETLPacketFromParent();
+    JSONObject getETLPacket();
+    void setETLPacket(JSONObject etlPacket);
 }
