@@ -8,11 +8,14 @@ import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 
 /**
  * Created by smithm19 on 2/6/17.
+ *
+ * RulesEngineTask performs the manipulation of data line by line according to the rules section of the ETL Packet.
  */
 public class RulesEngineTask implements Task {
 
@@ -24,7 +27,16 @@ public class RulesEngineTask implements Task {
     private JSONArray sourceHeader;
 
 
-
+    /**
+     * Gets ETL Packet from the parent process then applies filters to the current, transforms and mappings. (In that order)
+     * Filter: loops through all filters within the ETL Packet and if the filter is false the line gets queued for deletion
+     * Transform: loops through all transforms and applies current transform to the current single line. If the new_field field is null
+     * then the transform is applied to the source_column, else a new field will be created with the value given in new_field.
+     * Mapping: Reorder the modified line to match the destination_header by trimming out fields that aren't in the list of destination_headers
+     *
+     *
+     * @see        Task
+     */
     public void apply() {
 
         JSONObject pckt = parent.getETLPacket();
@@ -40,12 +52,8 @@ public class RulesEngineTask implements Task {
         this.newHeader = sourceHeader;
         List<Integer> toDeleteList = new ArrayList<Integer>();
 
-        //System.out.println("SOURCE HEADER: " + sourceHeader);
-        //System.out.println("DESTINATION HEADER: " + destinationHeader);
 
-        makeNewHeader(transforms);
-        //System.out.println("NEW HEADER " + newHeader);
-        //System.out.println("PRE-Size of Data: " + dataContents.length());
+        makeNewHeader(transforms, mappings);
 
         JSONArray headersToKeep = headerIndexesToKeep();
 
@@ -57,7 +65,7 @@ public class RulesEngineTask implements Task {
                 toDeleteList.add(toDeleteList.size(), x);
             }else {
                 line = doTransformations(transforms, line);
-                line = doMappings(line, headersToKeep);
+                line = doMappings(mappings, line, headersToKeep);
                 System.out.println("Current Line: " + line);
                 dataContents.put(x, line);
             }
@@ -87,12 +95,6 @@ public class RulesEngineTask implements Task {
         return this.parent;
     }
 
-    private int idiot(JSONObject pckt) {
-
-        return 1;
-    }
-
-
     private JSONArray deleteUnwantedElements(JSONArray data, List<Integer> listToDelete){
         if(listToDelete.size()==0){
             return data;
@@ -109,14 +111,6 @@ public class RulesEngineTask implements Task {
         return content.getJSONArray(line_num);
     }
 
-    private JSONArray doMappings(JSONArray line, JSONArray toKeep) {
-        JSONArray sendback = new JSONArray();
-        for (int x =0; x<toKeep.length();x++){
-            sendback.put(x, line.get(toKeep.getInt(x)));
-        }
-
-        return sendback;
-    }
     private static String hashString(String string, String typeOfHash){
         try {
             MessageDigest digest = MessageDigest.getInstance(typeOfHash);
@@ -137,6 +131,27 @@ public class RulesEngineTask implements Task {
                     .substring(1));
         }
         return stringBuffer.toString();
+    }
+
+    private JSONArray doMappings(JSONObject mappings, JSONArray line, JSONArray toKeep) {
+        JSONArray sendback = new JSONArray();
+        for (int x=0; x<destinationHeader.length();x++){
+            sendback.put(x,JSONObject.NULL);
+        }
+        for (int x =0; x<toKeep.length();x++){
+            sendback.put(x, line.get(toKeep.getInt(x)));
+        }
+
+        Iterator<?> keys = mappings.keys();
+        while (keys.hasNext()){
+            String curMapping = (String)keys.next();
+            String newField = getCurrMappingDestinationField(mappings, curMapping);
+            int indexCurMapping = getArrayIndex(newHeader,curMapping);
+            int newFieldIndex = getArrayIndex(destinationHeader, newField);
+            sendback.put(newFieldIndex, line.get(indexCurMapping));
+        }
+
+        return sendback;
     }
 
     private JSONArray doTransformations(JSONObject transforms,JSONArray line) {
@@ -248,15 +263,12 @@ public class RulesEngineTask implements Task {
                     value = line.get(indexToGet).toString();
 
                     if (transformValue.equals("MD5")){
-                        System.out.println(hashString(value, "MD5"));
                         line.put(indexToGet,hashString(value, "MD5"));
                     }
                     else if (transformValue.equals("SHA1")){
-                        System.out.println(hashString(value, "SHA-1"));
                         line.put(indexToGet,hashString(value, "SHA-1"));
                     }
                     else if (transformValue.equals("SHA256")){
-                        System.out.println(hashString(value, "SHA-256"));
                         line.put(indexToGet,hashString(value, "SHA-256"));
                     }
 
@@ -274,6 +286,38 @@ public class RulesEngineTask implements Task {
                     }
                     else if (transformValue.equals("SHA256")){
                         line.put(indexToGet,hashString(value, "SHA-256"));
+                    }
+                }
+            }
+            else if (getCurrTransformSymbol(transforms, curTransform).equals("UCASE")) {
+                if(newField.equals("")) {
+                    curSource = getCurrTransformSource(transforms,curTransform);
+                    indexToGet  = getArrayIndex(this.sourceHeader,curSource);
+
+                    if (line.get(indexToGet) instanceof String) {
+                        line.put(indexToGet, line.getString(indexToGet).toUpperCase());
+                    }
+                }else{
+                    indexToGet= getArrayIndex(this.newHeader,newField);
+
+                    if (line.get(indexToGet) instanceof String) {
+                        line.put(indexToGet, line.getString(indexToGet).toUpperCase());
+                    }
+                }
+            }
+            else if (getCurrTransformSymbol(transforms, curTransform).equals("LCASE")) {
+                if(newField.equals("")) {
+                    curSource = getCurrTransformSource(transforms,curTransform);
+                    indexToGet  = getArrayIndex(this.sourceHeader,curSource);
+
+                    if (line.get(indexToGet) instanceof String) {
+                        line.put(indexToGet, line.getString(indexToGet).toLowerCase());
+                    }
+                }else{
+                    indexToGet= getArrayIndex(this.newHeader,newField);
+
+                    if (line.get(indexToGet) instanceof String) {
+                        line.put(indexToGet, line.getString(indexToGet).toLowerCase());
                     }
                 }
             }
@@ -388,6 +432,11 @@ public class RulesEngineTask implements Task {
         return -1;
     }
 
+
+    private String getCurrMappingDestinationField(JSONObject mapping,String curMapping){
+        return mapping.getString(curMapping);
+    }
+
     //code looks like garbage with this stuff everywhere, so I made Transformation functions to limit the grossness
     ////
     ////
@@ -410,7 +459,7 @@ public class RulesEngineTask implements Task {
         return trans.getJSONObject(curTransform).getString("transform").split(" ")[0];
     }
     //Makes newHeader
-    private void makeNewHeader(JSONObject transforms){
+    private void makeNewHeader(JSONObject transforms, JSONObject mappings){
         for (int x=1; x<transforms.length()+1;x++) {
             String curTransform = "transform" + x;
             String newField = getCurrTransformNewField(transforms, curTransform);
@@ -421,6 +470,9 @@ public class RulesEngineTask implements Task {
             }
 
         }
+
+
+
     }
     ////
     ////
